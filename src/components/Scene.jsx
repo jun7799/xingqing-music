@@ -38,7 +38,7 @@ const Scene = ({ currentTime = 0 }) => {
       preloadDone.current = true;
       ALL_SCENES.forEach(scene => {
         const img = new Image();
-        img.src = `/${scene}.jpg`;
+        img.src = `${import.meta.env.BASE_URL}${scene}.jpg`;
       });
       console.log('[Scene] All images preloaded');
     }
@@ -59,7 +59,7 @@ const Scene = ({ currentTime = 0 }) => {
         key={displayedScene}
         className="scene-image"
         style={{
-          backgroundImage: `url('/${displayedScene}.jpg')`
+          backgroundImage: `url('${import.meta.env.BASE_URL}${displayedScene}.jpg')`
         }}
       />
       {/* 老电影效果层 */}

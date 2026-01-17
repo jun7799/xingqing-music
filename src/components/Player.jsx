@@ -19,7 +19,7 @@ const Player = () => {
   // 初始化 Howler
   useEffect(() => {
     const sound = new Howl({
-      src: ['/song.mp3'],
+      src: [`${import.meta.env.BASE_URL}song.mp3`],
       html5: false,
       preload: true,
       onload: () => {
@@ -57,7 +57,7 @@ const Player = () => {
 
   // 加载歌词文件
   useEffect(() => {
-    fetch('/lyrics.lrc')
+    fetch(`${import.meta.env.BASE_URL}lyrics.lrc`)
       .then(response => response.text())
       .then(text => {
         const parsedLyrics = parseLRC(text);
