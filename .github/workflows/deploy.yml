@@ -24,6 +24,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Restore source index.html if needed
+        run: |
+          # 如果当前 index.html 是构建版本（包含 hashed assets），恢复源版本
+          if grep -q "assets/index-" index.html; then
+            echo "Detected built index.html, restoring from last non-bot commit..."
+            # 找到最后一个非 github-actions[bot] 提交的 index.html
+            LAST_SOURCE_COMMIT=$(git log --all --format="%H %an" --index.html | grep -v "github-actions\[bot\]" | head -1 | cut -d' ' -f1)
+            if [ -n "$LAST_SOURCE_COMMIT" ]; then
+              git checkout $LAST_SOURCE_COMMIT -- index.html
+              echo "Restored index.html from commit $LAST_SOURCE_COMMIT"
+            fi
+          else
+            echo "Source index.html detected, no restore needed"
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -38,30 +53,18 @@ jobs:
 
       - name: Copy dist to root
         run: |
-          # 备份原始 index.html
-          cp index.html index.html.bak
           # 删除旧的部署文件
           rm -rf assets *.jpg song.mp3 lyrics.lrc scenes.json scenes/
           # 复制构建产物到根目录
           cp -r dist/* .
           rm -rf dist
 
-      - name: Commit deployment files
+      - name: Commit and push deployment
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "Deploy to GitHub Pages"
-          git push
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Restore source index.html
-        run: |
-          # 恢复源 index.html，确保下次构建正常
-          mv index.html.bak index.html
-          git add index.html
-          git commit -m "chore: 恢复源index.html用于下次构建"
           git push
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
